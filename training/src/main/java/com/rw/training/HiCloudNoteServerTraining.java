@@ -1,6 +1,8 @@
 package com.rw.training;
 
 
+import com.alibaba.fastjson.JSON;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -8,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -15,11 +18,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 //如果JDK版本是1.8,可使用原生Base64类
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -42,18 +42,18 @@ public class HiCloudNoteServerTraining {
     public static void main(String[] args) throws Exception {
 
         //必填,请参考"开发准备"获取如下数据,替换为实际值
-        String url = "https://smsapi.cn-north-4.myhuaweicloud.com:443/sms/batchSendSms/v1"; //APP接入地址(在控制台"应用管理"页面获取)+接口访问URI
-        String appKey = "c8RWg3ggEcyd4D3p94bf3Y7x1Ile"; //APP_Key
-        String appSecret = "q4Ii87BhST9vcs8wvrzN80SfD7Al"; //APP_Secret
-        String sender = "csms12345678"; //国内短信签名通道号或国际/港澳台短信通道号
-        String templateId = "8ff55eac1d0b478ab3c06c3c6a492300"; //模板ID
+        String url = "https://smsapi.cn-south-1.myhuaweicloud.com:443/sms/batchSendSms/v1"; //APP接入地址(在控制台"应用管理"页面获取)+接口访问URI
+        String appKey = "iZA4u69023CpkvGGxrXxrBuNMp1B"; //APP_Key
+        String appSecret = "CRZrS3exn54u6xL9he0s7Vi4ihR3"; //APP_Secret
+        String sender = "8822080926539"; //国内短信签名通道号或国际/港澳台短信通道号
+        String templateId = "eed2c99c6fe94751af2e6588d6ece4f2"; //模板ID
 
         //条件必填,国内短信关注,当templateId指定的模板类型为通用模板时生效且必填,必须是已审核通过的,与模板类型一致的签名名称
         //国际/港澳台短信不用关注该参数
-        String signature = "华为云短信测试"; //签名名称
+        String signature = "表扬反馈模板"; //签名名称
 
         //必填,全局号码格式(包含国家码),示例:+8615123456789,多个号码之间用英文逗号分隔
-        String receiver = "+8618996317314,+86152****7890"; //短信接收人号码
+        String receiver = "+8618996317314"; //短信接收人号码
 
         //选填,短信状态报告接收地址,推荐使用域名,为空或者不填表示不接收状态报告
         String statusCallBack = "";
@@ -65,15 +65,16 @@ public class HiCloudNoteServerTraining {
          * 模板中的每个变量都必须赋值，且取值不能为空
          * 查看更多模板和变量规范:产品介绍>模板和变量规范
          */
-        String templateParas = "[\"369751\"]"; //模板变量，此处以单变量验证码短信为例，请客户自行生成6位验证码，并定义为字符串类型，以杜绝首位0丢失的问题（例如：002569变成了2569）。
+        //String templateParas = "[\"369751\"]"; //模板变量，此处以单变量验证码短信为例，请客户自行生成6位验证码，并定义为字符串类型，以杜绝首位0丢失的问题（例如：002569变成了2569）。
 
+        String templateParas = JSON.toJSONString(Arrays.asList("2023-05-18T02:53:51"));
         //请求Body,不携带签名名称时,signature请填null
         String body = buildRequestBody(sender, receiver, templateId, templateParas, statusCallBack, signature);
         if (null == body || body.isEmpty()) {
             System.out.println("body is null.");
             return;
         }
-
+        System.out.println(body);
         //请求Headers中的X-WSSE参数值
         String wsseHeader = buildWsseHeader(appKey, appSecret);
         if (null == wsseHeader || wsseHeader.isEmpty()) {
